@@ -1,10 +1,19 @@
+import { createBrowserRouter, Outlet, RouterProvider } from 'react-router-dom'
 import { ApplicationPlugin } from '@/core'
-import {
-  createBrowserRouter,
-  RouterProvider,
-  type RouteObject,
-} from 'react-router-dom'
 import NavigationGuards from './NavigationGuards'
+import { layoutManager } from './layoutManager'
+import type { RouteObject } from 'react-router-dom'
+
+function RootRouteComponent() {
+  const Layout = layoutManager.getCurrentLayout()
+  return (
+    <NavigationGuards>
+      <Layout>
+        <Outlet />
+      </Layout>
+    </NavigationGuards>
+  )
+}
 
 interface RouterPluginOptions {
   routes: RouteObject[]
@@ -15,16 +24,18 @@ export const RouterPlugin = (
   options: RouterPluginOptions,
 ): ApplicationPlugin => {
   return ctx => {
-    const router = createBrowserRouter(
-      [
-        {
-          path: '/',
-          element: <NavigationGuards />,
-          children: options.routes,
-        },
-      ],
-      { basename: options.basename || '/' },
-    )
+    const rootRoute: RouteObject = {
+      id: 'root',
+      path: '',
+      Component: RootRouteComponent,
+      children: options.routes,
+    }
+    const baseRoutes = [rootRoute]
+    ctx.setCurrentLayout = layoutManager.setCurrentLayout
+    ctx.registerLayout = layoutManager.registerLayout
+    const router = createBrowserRouter(baseRoutes, {
+      basename: options.basename || '/',
+    })
     return {
       start: () => {
         ctx.setAppSlot(prev => {
@@ -41,5 +52,8 @@ export const RouterPlugin = (
 }
 
 declare module '@/core' {
-  interface ApplicationContext {}
+  interface ApplicationContext {
+    setCurrentLayout: typeof layoutManager.setCurrentLayout
+    registerLayout: typeof layoutManager.registerLayout
+  }
 }

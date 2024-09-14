@@ -14,7 +14,7 @@ app
     RouterPlugin({
       routes: [
         {
-          path: '',
+          path: '/',
           element: <App />,
         },
       ],

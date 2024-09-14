@@ -1,9 +1,6 @@
 import { ApplicationPlugin } from '@/core'
 import { StrictMode } from 'react'
 import ReactDOM from 'react-dom/client'
-// import App from './App'
-import type { ReactNode } from 'react'
-import type { Root } from 'react-dom/client'
 
 interface ReactPluginOptions {
   el: Element
@@ -11,11 +8,15 @@ interface ReactPluginOptions {
 
 export const ReactPlugin = (options: ReactPluginOptions): ApplicationPlugin => {
   return ctx => {
-    let node: ReactNode = null
-    ctx.root = ReactDOM.createRoot(options.el)
+    let node: React.ReactNode = null
+    const root = ReactDOM.createRoot(options.el)
+    const render = () => {
+      root.render(<StrictMode>{node}</StrictMode>)
+    }
+    ctx.render = render
     ctx.setAppSlot = slot => {
       node = slot(node)
-      ctx.root.render(<StrictMode>{node}</StrictMode>)
+      ctx.render()
     }
     return {}
   }
@@ -23,7 +24,7 @@ export const ReactPlugin = (options: ReactPluginOptions): ApplicationPlugin => {
 
 declare module '@/core' {
   interface ApplicationContext {
-    root: Root
-    setAppSlot: (slot: (prev: ReactNode) => ReactNode) => void
+    render: () => void
+    setAppSlot: (slot: (prev: React.ReactNode) => React.ReactNode) => void
   }
 }

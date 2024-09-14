@@ -1,12 +1,16 @@
 import { useEffect, useRef } from 'react'
-import { Outlet, useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 import type { Location } from 'react-router-dom'
 
 export interface NavigationGuardsProps {
   onChange?: (value: Location, oldValue: Location) => void
+  children: React.ReactNode
 }
 
-export default function NavigationGuards({ onChange }: NavigationGuardsProps) {
+export default function NavigationGuards({
+  onChange,
+  children,
+}: NavigationGuardsProps) {
   const onChangeRef = useRef(onChange)
   useEffect(() => {
     onChangeRef.current = onChange
@@ -23,5 +27,5 @@ export default function NavigationGuards({ onChange }: NavigationGuardsProps) {
     onChangeRef.current?.(prevLocation.current, prev)
   }, [location])
 
-  return <Outlet />
+  return children
 }
