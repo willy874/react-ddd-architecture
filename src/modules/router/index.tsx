@@ -1,11 +1,30 @@
-import { createBrowserRouter, Outlet, RouterProvider } from 'react-router-dom'
-import { ApplicationPlugin } from '@/core'
+import { useEffect } from 'react'
+import {
+  createBrowserRouter,
+  Outlet,
+  RouterProvider,
+  useNavigate,
+} from 'react-router-dom'
+import { ApplicationContext, ApplicationPlugin } from '@/core'
 import NavigationGuards from './NavigationGuards'
 import { layoutManager } from './layoutManager'
+import { routerManager } from './routerManager'
 import type { RouteObject } from 'react-router-dom'
 
-function RootRouteComponent() {
+interface RootRouteComponentProps {
+  appContext: ApplicationContext
+}
+
+function RootRouteComponent({ appContext }: RootRouteComponentProps) {
   const Layout = layoutManager.getCurrentLayout()
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    appContext.routerPush = (to: string) => navigate(to)
+    appContext.routerReplace = (to: string) => navigate(to, { replace: true })
+    appContext.routerGo = navigate
+  }, [appContext, navigate])
+
   return (
     <NavigationGuards>
       <Layout>
@@ -16,26 +35,30 @@ function RootRouteComponent() {
 }
 
 interface RouterPluginOptions {
-  routes: RouteObject[]
+  routes?: RouteObject[]
   basename?: string
 }
 
 export const RouterPlugin = (
   options: RouterPluginOptions,
 ): ApplicationPlugin => {
+  const { routes = [], basename = '/' } = options
   return ctx => {
-    const rootRoute: RouteObject = {
-      id: 'root',
-      path: '',
-      Component: RootRouteComponent,
-      children: options.routes,
-    }
-    const baseRoutes = [rootRoute]
-    ctx.setCurrentLayout = layoutManager.setCurrentLayout
-    ctx.registerLayout = layoutManager.registerLayout
-    const router = createBrowserRouter(baseRoutes, {
-      basename: options.basename || '/',
-    })
+    routerManager.routes = [
+      {
+        id: 'root',
+        path: '',
+        element: <RootRouteComponent appContext={ctx} />,
+        children: [
+          //
+          ...routes,
+          //
+        ],
+      },
+    ]
+    layoutManager.onLayoutChange(() => ctx.render())
+    ctx.setCurrentLayout = layoutManager.setCurrentLayout.bind(layoutManager)
+    ctx.registerLayout = layoutManager.registerLayout.bind(layoutManager)
     return {
       start: () => {
         ctx.setAppSlot(prev => {
@@ -44,6 +67,9 @@ export const RouterPlugin = (
               'RouterPlugin must be the first AppSlot in the chain',
             )
           }
+          const router = createBrowserRouter(routerManager.routes, {
+            basename,
+          })
           return <RouterProvider router={router} />
         })
       },
@@ -53,7 +79,13 @@ export const RouterPlugin = (
 
 declare module '@/core' {
   interface ApplicationContext {
-    setCurrentLayout: typeof layoutManager.setCurrentLayout
-    registerLayout: typeof layoutManager.registerLayout
+    routerPush: (to: string) => void
+    routerReplace: (to: string) => void
+    routerGo: (delta: number) => void
+    setCurrentLayout: (type: string) => void
+    registerLayout: (
+      type: string,
+      node: React.FC<{ children: React.ReactNode }>,
+    ) => void
   }
 }

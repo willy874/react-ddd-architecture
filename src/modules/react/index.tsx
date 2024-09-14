@@ -10,10 +10,9 @@ export const ReactPlugin = (options: ReactPluginOptions): ApplicationPlugin => {
   return ctx => {
     let node: React.ReactNode = null
     const root = ReactDOM.createRoot(options.el)
-    const render = () => {
+    ctx.render = () => {
       root.render(<StrictMode>{node}</StrictMode>)
     }
-    ctx.render = render
     ctx.setAppSlot = slot => {
       node = slot(node)
       ctx.render()

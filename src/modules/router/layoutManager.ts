@@ -1,21 +1,38 @@
-type LayoutComponent = React.FC<{ children: React.ReactNode }>
+export type LayoutComponent = React.FC<{ children: React.ReactNode }>
 
-const createLayoutManager = () => {
-  const DefaultLayout: LayoutComponent = props => props.children
-  const layouts: Record<string, LayoutComponent> = {
-    default: DefaultLayout,
+class LayoutManager {
+  layouts: Record<string, LayoutComponent> = {
+    default: props => props.children,
   }
-  let currentType = 'default'
-  return {
-    layouts,
-    getCurrentLayout: () => layouts[currentType] || DefaultLayout,
-    registerLayout: (type: string, node: LayoutComponent) => {
-      layouts[type] = node
-    },
-    setCurrentLayout: (type: string) => {
-      currentType = type
-    },
+  currentType = ''
+  listeners: Array<(type: string) => void> = []
+
+  getCurrentLayout() {
+    return this.layouts[this.currentType] || this.layouts.default
+  }
+
+  registerLayout(type: string, node: LayoutComponent) {
+    this.layouts[type] = node
+  }
+
+  emitLayoutChange(type: string) {
+    this.listeners.forEach(l => l(type))
+  }
+
+  onLayoutChange(callback: (type: string) => void) {
+    this.listeners = [...this.listeners, callback]
+    return () => {
+      this.listeners = this.listeners.filter(l => l !== callback)
+    }
+  }
+
+  setCurrentLayout(type = 'default') {
+    const prev = this.currentType
+    this.currentType = type
+    if (prev !== type) {
+      this.emitLayoutChange(type)
+    }
   }
 }
 
-export const layoutManager = createLayoutManager()
+export const layoutManager = new LayoutManager()
