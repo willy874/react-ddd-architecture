@@ -1,3 +1,5 @@
+import { EventEmitter } from 'events'
+
 export interface ApplicationContext {}
 
 export interface ApplicationPluginOptions {
@@ -10,6 +12,7 @@ export type ApplicationPlugin = (
 
 class Application {
   context = {} as ApplicationContext
+  emitter = new EventEmitter()
 
   plugins: ApplicationPluginOptions[] = []
 
