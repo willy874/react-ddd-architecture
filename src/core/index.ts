@@ -1,6 +1,8 @@
 export interface ApplicationContext {}
 
-export interface ApplicationPluginOptions {}
+export interface ApplicationPluginOptions {
+  start?: () => void
+}
 
 export type ApplicationPlugin = (
   ctx: ApplicationContext,
@@ -14,6 +16,12 @@ class Application {
   use(plugin: ApplicationPlugin) {
     this.plugins = [...this.plugins, plugin(this.context)]
     return this
+  }
+
+  start() {
+    this.plugins.forEach(plugin => {
+      plugin.start?.()
+    })
   }
 }
 
