@@ -20,7 +20,7 @@ interface RouterPluginOptions {
 
 const ROOT_ROUTE_ID = 'root'
 
-export const RouterPlugin = (
+export const RouterGuardPlugin = (
   options: RouterPluginOptions,
 ): ApplicationPlugin => {
   const { basename = '/', onInit } = options

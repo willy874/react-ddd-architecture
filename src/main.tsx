@@ -1,7 +1,7 @@
 import './index.css'
 import { Application } from './core'
-import { ReactPlugin } from './modules/react'
-import { RouterPlugin } from './modules/router'
+import { ReactAppPlugin } from './modules/ReactApp'
+import { RouterGuardPlugin } from './modules/RouterGuard'
 import App from './App'
 import { routerManager } from './libs/router'
 
@@ -9,12 +9,12 @@ const app = new Application({})
 
 app
   .use(
-    ReactPlugin({
+    ReactAppPlugin({
       el: document.getElementById('root')!,
     }),
   )
   .use(
-    RouterPlugin({
+    RouterGuardPlugin({
       onInit: route => {
         routerManager.addRouteChild(route.id, {
           path: '/',

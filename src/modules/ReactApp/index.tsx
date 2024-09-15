@@ -6,7 +6,9 @@ interface ReactPluginOptions {
   el: Element
 }
 
-export const ReactPlugin = (options: ReactPluginOptions): ApplicationPlugin => {
+export const ReactAppPlugin = (
+  options: ReactPluginOptions,
+): ApplicationPlugin => {
   return app => {
     let node: React.ReactNode = null
     const root = ReactDOM.createRoot(options.el)
