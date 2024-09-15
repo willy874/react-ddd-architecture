@@ -7,9 +7,12 @@ import {
 } from 'react-router-dom'
 import { ApplicationPlugin } from '@/core'
 import NavigationGuards from './NavigationGuards'
-import { layoutManager } from './layoutManager'
-import { routerManager } from './routerManager'
+import { LayoutManager } from './layoutManager'
+import { RouterManager } from './routerManager'
 import type { RouteObject } from 'react-router-dom'
+
+const layoutManager = new LayoutManager()
+const routerManager = new RouterManager()
 
 function RootRouteComponent() {
   const Layout = layoutManager.getCurrentLayout()

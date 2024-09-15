@@ -43,5 +43,3 @@ export class RouterManager<R extends RouteObject> {
     })
   }
 }
-
-export const routerManager = new RouterManager()

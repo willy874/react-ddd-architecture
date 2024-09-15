@@ -1,6 +1,6 @@
-export type LayoutComponent = React.FC<{ children: React.ReactNode }>
+type LayoutComponent = React.FC<{ children: React.ReactNode }>
 
-class LayoutManager {
+export class LayoutManager {
   layouts: Record<string, LayoutComponent> = {
     default: props => props.children,
   }
@@ -34,5 +34,3 @@ class LayoutManager {
     }
   }
 }
-
-export const layoutManager = new LayoutManager()
