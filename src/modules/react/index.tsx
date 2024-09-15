@@ -7,22 +7,23 @@ interface ReactPluginOptions {
 }
 
 export const ReactPlugin = (options: ReactPluginOptions): ApplicationPlugin => {
-  return ctx => {
+  return app => {
     let node: React.ReactNode = null
     const root = ReactDOM.createRoot(options.el)
-    ctx.render = () => {
+    const render = () => {
       root.render(<StrictMode>{node}</StrictMode>)
     }
-    ctx.setAppSlot = slot => {
+    app.provider('render', render)
+    app.provider('setAppSlot', slot => {
       node = slot(node)
-      ctx.render()
-    }
+      render()
+    })
     return {}
   }
 }
 
 declare module '@/core' {
-  interface ApplicationContext {
+  interface ApplicationService {
     render: () => void
     setAppSlot: (slot: (prev: React.ReactNode) => React.ReactNode) => void
   }

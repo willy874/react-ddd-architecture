@@ -1,7 +1,8 @@
-import { RouteObject } from 'react-router-dom'
+import { NavigateFunction, RouteObject } from 'react-router-dom'
 
 export class RouterManager<R extends RouteObject> {
   routes: R[] = []
+  navigate: NavigateFunction = () => {}
 
   findRoute(
     routes: R[],

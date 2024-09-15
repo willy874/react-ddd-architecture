@@ -5,25 +5,19 @@ import {
   RouterProvider,
   useNavigate,
 } from 'react-router-dom'
-import { ApplicationContext, ApplicationPlugin } from '@/core'
+import { ApplicationPlugin } from '@/core'
 import NavigationGuards from './NavigationGuards'
 import { layoutManager } from './layoutManager'
 import { routerManager } from './routerManager'
 import type { RouteObject } from 'react-router-dom'
 
-interface RootRouteComponentProps {
-  appContext: ApplicationContext
-}
-
-function RootRouteComponent({ appContext }: RootRouteComponentProps) {
+function RootRouteComponent() {
   const Layout = layoutManager.getCurrentLayout()
   const navigate = useNavigate()
 
   useEffect(() => {
-    appContext.routerPush = (to: string) => navigate(to)
-    appContext.routerReplace = (to: string) => navigate(to, { replace: true })
-    appContext.routerGo = navigate
-  }, [appContext, navigate])
+    routerManager.navigate = navigate
+  }, [navigate])
 
   return (
     <NavigationGuards>
@@ -43,12 +37,12 @@ export const RouterPlugin = (
   options: RouterPluginOptions,
 ): ApplicationPlugin => {
   const { routes = [], basename = '/' } = options
-  return ctx => {
+  return app => {
     routerManager.routes = [
       {
         id: 'root',
         path: '',
-        element: <RootRouteComponent appContext={ctx} />,
+        element: <RootRouteComponent />,
         children: [
           //
           ...routes,
@@ -56,12 +50,27 @@ export const RouterPlugin = (
         ],
       },
     ]
-    layoutManager.onLayoutChange(() => ctx.render())
-    ctx.setCurrentLayout = layoutManager.setCurrentLayout.bind(layoutManager)
-    ctx.registerLayout = layoutManager.registerLayout.bind(layoutManager)
+    layoutManager.onLayoutChange(() => app.query('render'))
+    app.provider(
+      'registerLayout',
+      layoutManager.registerLayout.bind(layoutManager),
+    )
+    app.provider(
+      'setCurrentLayout',
+      layoutManager.setCurrentLayout.bind(layoutManager),
+    )
+    app.provider('routerPush', (to: string) => {
+      routerManager.navigate(to)
+    })
+    app.provider('routerReplace', (to: string) => {
+      routerManager.navigate(to, { replace: true })
+    })
+    app.provider('routerGo', (delta: number) => {
+      routerManager.navigate(delta)
+    })
     return {
       start: () => {
-        ctx.setAppSlot(prev => {
+        app.query('setAppSlot', prev => {
           if (prev) {
             throw new Error(
               'RouterPlugin must be the first AppSlot in the chain',
@@ -78,7 +87,7 @@ export const RouterPlugin = (
 }
 
 declare module '@/core' {
-  interface ApplicationContext {
+  interface ApplicationService {
     routerPush: (to: string) => void
     routerReplace: (to: string) => void
     routerGo: (delta: number) => void
