@@ -11,5 +11,6 @@ module.exports = {
   plugins: ['react-refresh', 'prettier'],
   rules: {
     'prettier/prettier': ['warn', require('./.prettierrc.cjs')],
+    '@typescript-eslint/ban-types': 'off',
   },
 }
