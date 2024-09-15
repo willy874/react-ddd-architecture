@@ -88,9 +88,10 @@ export class Application {
     return this
   }
 
-  start() {
+  start(cb?: () => void) {
     this.plugins.forEach(plugin => {
       plugin.start?.()
     })
+    cb?.()
   }
 }

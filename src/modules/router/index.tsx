@@ -1,76 +1,40 @@
-import { useEffect } from 'react'
-import {
-  createBrowserRouter,
-  Outlet,
-  RouterProvider,
-  useNavigate,
-} from 'react-router-dom'
+import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import type { Location, RouteObject } from 'react-router-dom'
+
 import { ApplicationPlugin } from '@/core'
-import NavigationGuards from './NavigationGuards'
-import { LayoutManager } from './layoutManager'
-import { RouterManager } from './routerManager'
-import type { RouteObject } from 'react-router-dom'
+import { routerManager } from '@/libs/router'
+import { layoutManager } from '@/libs/layout'
 
-const layoutManager = new LayoutManager()
-const routerManager = new RouterManager()
-
-function RootRouteComponent() {
-  const Layout = layoutManager.getCurrentLayout()
-  const navigate = useNavigate()
-
-  useEffect(() => {
-    routerManager.navigate = navigate
-  }, [navigate])
-
-  return (
-    <NavigationGuards>
-      <Layout>
-        <Outlet />
-      </Layout>
-    </NavigationGuards>
-  )
-}
+import RootRouteComponent from './RootRouteComponent'
 
 interface RouterPluginOptions {
-  routes?: RouteObject[]
   basename?: string
+  onInit?: (
+    rootRoute: RouteObject & {
+      id: string
+      path: string
+      children: RouteObject[]
+    },
+  ) => void
 }
+
+const ROOT_ROUTE_ID = 'root'
 
 export const RouterPlugin = (
   options: RouterPluginOptions,
 ): ApplicationPlugin => {
-  const { routes = [], basename = '/' } = options
+  const { basename = '/', onInit } = options
   return app => {
-    routerManager.routes = [
-      {
-        id: 'root',
-        path: '',
-        element: <RootRouteComponent />,
-        children: [
-          //
-          ...routes,
-          //
-        ],
-      },
-    ]
+    const ROOT_ROUTE = {
+      id: ROOT_ROUTE_ID,
+      path: '',
+      element: <RootRouteComponent app={app} />,
+      children: [],
+    }
+    routerManager.addRoutes(ROOT_ROUTE)
+    onInit?.(ROOT_ROUTE)
     layoutManager.onLayoutChange(() => app.query('render'))
-    app.provider(
-      'registerLayout',
-      layoutManager.registerLayout.bind(layoutManager),
-    )
-    app.provider(
-      'setCurrentLayout',
-      layoutManager.setCurrentLayout.bind(layoutManager),
-    )
-    app.provider('routerPush', (to: string) => {
-      routerManager.navigate(to)
-    })
-    app.provider('routerReplace', (to: string) => {
-      routerManager.navigate(to, { replace: true })
-    })
-    app.provider('routerGo', (delta: number) => {
-      routerManager.navigate(delta)
-    })
+    routerManager.onRoutesChange(() => app.query('render'))
     return {
       start: () => {
         app.query('setAppSlot', prev => {
@@ -79,7 +43,7 @@ export const RouterPlugin = (
               'RouterPlugin must be the first AppSlot in the chain',
             )
           }
-          const router = createBrowserRouter(routerManager.routes, {
+          const router = createBrowserRouter(routerManager.getRoutes(), {
             basename,
           })
           return <RouterProvider router={router} />
@@ -90,14 +54,8 @@ export const RouterPlugin = (
 }
 
 declare module '@/core' {
-  interface ApplicationService {
-    routerPush: (to: string) => void
-    routerReplace: (to: string) => void
-    routerGo: (delta: number) => void
-    setCurrentLayout: (type: string) => void
-    registerLayout: (
-      type: string,
-      node: React.FC<{ children: React.ReactNode }>,
-    ) => void
+  interface ApplicationEvent {
+    routeChange: (value: Location, oldValue: Location) => void
+    beforeRouteChange: (value: Location) => void
   }
 }

@@ -1,11 +1,13 @@
+import { EventEmitter } from 'events'
+
 type LayoutComponent = React.FC<{ children: React.ReactNode }>
 
 export class LayoutManager {
-  layouts: Record<string, LayoutComponent> = {
+  private layouts: Record<string, LayoutComponent> = {
     default: props => props.children,
   }
-  currentType = ''
-  listeners: Array<(type: string) => void> = []
+  private currentType = ''
+  private emitter = new EventEmitter()
 
   getCurrentLayout() {
     return this.layouts[this.currentType] || this.layouts.default
@@ -15,14 +17,10 @@ export class LayoutManager {
     this.layouts[type] = node
   }
 
-  emitLayoutChange(type: string) {
-    this.listeners.forEach(l => l(type))
-  }
-
   onLayoutChange(callback: (type: string) => void) {
-    this.listeners = [...this.listeners, callback]
+    this.emitter.on('layoutChange', callback)
     return () => {
-      this.listeners = this.listeners.filter(l => l !== callback)
+      this.emitter.off('layoutChange', callback)
     }
   }
 
@@ -30,7 +28,7 @@ export class LayoutManager {
     const prev = this.currentType
     this.currentType = type
     if (prev !== type) {
-      this.emitLayoutChange(type)
+      this.emitter.emit('layoutChange', type)
     }
   }
 }
