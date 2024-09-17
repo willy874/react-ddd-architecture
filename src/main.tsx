@@ -2,7 +2,7 @@ import './index.css'
 import { Application } from './core'
 import { ReactAppPlugin } from './modules/ReactApp'
 import { RouterGuardPlugin } from './modules/RouterGuard'
-import App from './App'
+import { Dashboard } from './modules/Dashboard'
 import { RouterManager } from './libs/router'
 import { LayoutManager } from './libs/layout'
 import { RouteObject } from 'react-router-dom'
@@ -31,7 +31,7 @@ app
         const ctx = app.getContext()
         ctx.router.addRouteChild(route.id, {
           path: '/',
-          element: <App />,
+          element: <Dashboard />,
         })
       },
     }),
