@@ -1,29 +1,29 @@
-import { Application } from '@/core'
-import { layoutManager } from '@/libs/layout'
-import { routerManager } from '@/libs/router'
 import { useEffect } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
-import NavigationGuards from './NavigationGuards'
 import type { Location } from 'react-router-dom'
+import type { Application } from '@/core'
+
+import NavigationGuards from './NavigationGuards'
 
 interface RootRouteComponentProps {
   app: Application
 }
 
 export default function RootRouteComponent({ app }: RootRouteComponentProps) {
+  const { router: routerManager, layout: layoutManager } = app.getContext()
   const Layout = layoutManager.getCurrentLayout()
   const navigate = useNavigate()
   const location = useLocation()
 
   useEffect(() => {
     routerManager.setNavigate(navigate)
-  }, [navigate])
+  }, [navigate, routerManager])
 
   useEffect(() => {
     return routerManager.onBeforeRouteChange(() => {
       app.emit('beforeRouteChange', location)
     })
-  }, [app, location])
+  }, [app, location, routerManager])
 
   return (
     <NavigationGuards

@@ -1,9 +1,6 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import type { Location, RouteObject } from 'react-router-dom'
-
-import { ApplicationPlugin } from '@/core'
-import { routerManager } from '@/libs/router'
-import { layoutManager } from '@/libs/layout'
+import type { ApplicationPlugin } from '@/core'
 
 import RootRouteComponent from './RootRouteComponent'
 
@@ -25,16 +22,17 @@ export const RouterGuardPlugin = (
 ): ApplicationPlugin => {
   const { basename = '/', onInit } = options
   return app => {
+    const ctx = app.getContext()
     const ROOT_ROUTE = {
       id: ROOT_ROUTE_ID,
       path: '',
       element: <RootRouteComponent app={app} />,
       children: [],
     }
-    routerManager.addRoutes(ROOT_ROUTE)
+    ctx.router.addRoutes(ROOT_ROUTE)
     onInit?.(ROOT_ROUTE)
-    layoutManager.onLayoutChange(() => app.query('render'))
-    routerManager.onRoutesChange(() => app.query('render'))
+    ctx.layout.onLayoutChange(() => app.query('render'))
+    ctx.router.onRoutesChange(() => app.query('render'))
     return {
       start: () => {
         app.query('setAppSlot', prev => {
@@ -43,7 +41,7 @@ export const RouterGuardPlugin = (
               'RouterPlugin must be the first AppSlot in the chain',
             )
           }
-          const router = createBrowserRouter(routerManager.getRoutes(), {
+          const router = createBrowserRouter(ctx.router.getRoutes(), {
             basename,
           })
           return <RouterProvider router={router} />

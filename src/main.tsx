@@ -3,9 +3,21 @@ import { Application } from './core'
 import { ReactAppPlugin } from './modules/ReactApp'
 import { RouterGuardPlugin } from './modules/RouterGuard'
 import App from './App'
-import { routerManager } from './libs/router'
+import { RouterManager } from './libs/router'
+import { LayoutManager } from './libs/layout'
+import { RouteObject } from 'react-router-dom'
 
-const app = new Application({})
+const app = new Application({
+  router: new RouterManager(),
+  layout: new LayoutManager(),
+})
+
+declare module './core' {
+  interface ApplicationContext {
+    router: RouterManager<RouteObject>
+    layout: LayoutManager
+  }
+}
 
 app
   .use(
@@ -16,7 +28,8 @@ app
   .use(
     RouterGuardPlugin({
       onInit: route => {
-        routerManager.addRouteChild(route.id, {
+        const ctx = app.getContext()
+        ctx.router.addRouteChild(route.id, {
           path: '/',
           element: <App />,
         })
