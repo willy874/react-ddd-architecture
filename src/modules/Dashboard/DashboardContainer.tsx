@@ -118,7 +118,7 @@ const data2 = [
   },
 ]
 
-export default function Dashboard() {
+export default function DashboardContainer() {
   return (
     <DashboardView
       currentScore={1350}

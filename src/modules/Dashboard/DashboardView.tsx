@@ -1,9 +1,10 @@
 import { useEffect, useInsertionEffect, useMemo, useRef, useState } from 'react'
 import { css } from '@emotion/css'
 import clsx from 'clsx'
-import PerformanceTracker from './PerformanceTracker'
+import TitleIcon from './TitleIcon.svg'
 import { PerformanceModel, ScoreDistributionModel } from './models'
 import Chart from './components/Chart'
+import ProgressBar from './components/ProgressBar'
 import { getChartOptions } from './chart-options'
 
 const styles = {
@@ -54,6 +55,19 @@ const styles = {
       position: absolute;
       inset: 0;
     }
+  `),
+  'performance-title': css(`
+    display: flex;
+    font-size: 24px;
+    font-weight: 600;
+    gap: 8px;
+    color: #2F2F2F;
+    margin-bottom: 24px;
+  `),
+  'performance-content': css(`
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
   `),
 }
 
@@ -122,6 +136,14 @@ export default function DashboardView({
     return 'lg'
   }, [containerWidth])
 
+  const mathData = useMemo(() => {
+    return {
+      current: performance.reduce((acc, item) => acc + item.current, 0),
+      max: performance.reduce((acc, item) => acc + item.max, 0),
+      min: performance.reduce((acc, item) => acc + item.min, 0),
+    }
+  }, [performance])
+
   return (
     <div ref={observer} className={styles['data-chart']}>
       <div className={styles['data-chart__container']}>
@@ -138,7 +160,29 @@ export default function DashboardView({
             })}
           >
             <div className={styles['data-chart__card']}>
-              <PerformanceTracker data={performance} />
+              <div>
+                <h2 className={styles['performance-title']}>
+                  <img src={TitleIcon} alt="" />
+                  <span>Performance Tracker</span>
+                </h2>
+                <div className={styles['performance-content']}>
+                  <ProgressBar
+                    title="Math"
+                    current={mathData.current}
+                    max={mathData.max}
+                    min={mathData.min}
+                  />
+                  {performance.map((item, index) => (
+                    <ProgressBar
+                      key={index}
+                      title={item.type}
+                      current={item.current}
+                      max={item.max}
+                      min={item.min}
+                    />
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
           <div
