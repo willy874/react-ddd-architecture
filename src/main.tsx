@@ -30,7 +30,7 @@ app
       onInit: route => {
         const ctx = app.getContext()
         ctx.router.addRouteChild(route.id, {
-          path: '/',
+          path: '*',
           element: <Dashboard />,
         })
       },
