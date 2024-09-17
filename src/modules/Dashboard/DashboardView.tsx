@@ -3,7 +3,7 @@ import { css } from '@emotion/css'
 import clsx from 'clsx'
 import PerformanceTracker from './PerformanceTracker'
 import { PerformanceModel, ScoreDistributionModel } from './models'
-import Chart from './Chart'
+import Chart from './components/Chart'
 import { getChartOptions } from './chart-options'
 
 const styles = {
