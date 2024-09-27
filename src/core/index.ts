@@ -1,6 +1,10 @@
 import { EventEmitter } from 'events'
 
-export interface ApplicationContext {}
+export interface ApplicationContext {
+  [key: string]: unknown
+  [key: number]: unknown
+  [key: symbol]: unknown
+}
 
 export interface ApplicationService {}
 

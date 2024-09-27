@@ -1,1 +1,2 @@
-export { RouterManager } from './routerManager'
+export { createRouter } from './createRouter'
+export { RemixRouterManager } from './RemixRouterManager'

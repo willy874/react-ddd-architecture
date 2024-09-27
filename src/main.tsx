@@ -1,39 +1,29 @@
 import './index.css'
 import { Application } from './core'
 import { ReactAppPlugin } from './modules/ReactApp'
-import { RouterGuardPlugin } from './modules/RouterGuard'
-import App from './App'
-import { RouterManager } from './libs/router'
-import { LayoutManager } from './libs/layout'
-import { RouteObject } from 'react-router-dom'
+import { RouterProvider } from 'react-router-dom'
+import { createRouter, RemixRouterManager } from './libs/router'
+import { useMemo } from 'react'
 
-const app = new Application({
-  router: new RouterManager(),
-  layout: new LayoutManager(),
-})
+const app = new Application({})
 
-declare module './core' {
-  interface ApplicationContext {
-    router: RouterManager<RouteObject>
-    layout: LayoutManager
-  }
+const router = new RemixRouterManager()
+
+function useRouter() {
+  return useMemo(() => createRouter(router), [])
 }
 
-app
-  .use(
-    ReactAppPlugin({
-      el: document.getElementById('root')!,
-    }),
-  )
-  .use(
-    RouterGuardPlugin({
-      onInit: route => {
-        const ctx = app.getContext()
-        ctx.router.addRouteChild(route.id, {
-          path: '/',
-          element: <App />,
-        })
-      },
-    }),
-  )
-  .start()
+function App() {
+  const r = useRouter()
+  return <RouterProvider router={r} />
+}
+
+app.use(
+  ReactAppPlugin({
+    el: () => document.getElementById('root')!,
+    main: App,
+    providers: [],
+  }),
+)
+
+app.query('render')

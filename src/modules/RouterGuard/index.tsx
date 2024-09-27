@@ -34,19 +34,7 @@ export const RouterGuardPlugin = (
     ctx.layout.onLayoutChange(() => app.query('render'))
     ctx.router.onRoutesChange(() => app.query('render'))
     return {
-      start: () => {
-        app.query('setAppSlot', prev => {
-          if (prev) {
-            throw new Error(
-              'RouterPlugin must be the first AppSlot in the chain',
-            )
-          }
-          const router = createBrowserRouter(ctx.router.getRoutes(), {
-            basename,
-          })
-          return <RouterProvider router={router} />
-        })
-      },
+      start: () => {},
     }
   }
 }
