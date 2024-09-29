@@ -11,6 +11,7 @@ export interface ApplicationService {}
 export interface ApplicationEvent {}
 
 export interface ApplicationPluginOptions {
+  name: string
   start?: () => void
 }
 

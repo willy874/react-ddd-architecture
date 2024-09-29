@@ -29,7 +29,9 @@ export const ReactAppPlugin = (
       )
     }
     app.provider('render', render)
-    return {}
+    return {
+      name: 'ReactAppPlugin',
+    }
   }
 }
 

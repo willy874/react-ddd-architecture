@@ -1,10 +1,11 @@
 import './index.css'
 import { Application } from './core'
+import { RouteConfig } from './libs/router'
 import { ReactAppPlugin } from './modules/ReactApp'
-import { createRouter, RouteConfig } from './libs/router'
+import { createRouter } from './modules/ReactRouter'
 
 const app = new Application({})
-const { RouterProvider, plugin: ReactRouterPlugin } = createRouter([
+const { RouterProvider, ReactRouterPlugin } = createRouter([
   {
     id: 'home',
     path: '/',
@@ -20,6 +21,6 @@ app
       providers: [],
     }),
   )
-  .use(ReactRouterPlugin)
+  .use(ReactRouterPlugin())
 
 app.query('render')

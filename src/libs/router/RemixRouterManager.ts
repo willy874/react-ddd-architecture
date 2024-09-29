@@ -6,6 +6,7 @@ import type {
   NavigateOptions,
 } from 'react-router-dom'
 import { RouterEventEmitter } from './RouterEventEmitter'
+import { mapTree } from './utils'
 
 export class RemixRouterManager extends RouterEventEmitter {
   private routes: RouteConfig[] = []
@@ -138,44 +139,15 @@ export class RemixRouterManager extends RouterEventEmitter {
     return current
   }
 
-  // addRoutes<R extends Route>(...newRoutes: R[]) {
-  //   this.routes.push(...newRoutes)
-  //   this.emitter.emit(ROUTES_CHANGE, this.routes)
-  //   return newRoutes
-  // }
-
-  // addRouteChild<R extends Route>(id: string, ...newRoutes: R[]) {
-  //   this.findRoute(this.routes, id, item => {
-  //     if (item.children) {
-  //       item.children.push(...newRoutes)
-  //     } else {
-  //       item.children = newRoutes
-  //     }
-  //   })
-  //   this.emitter.emit(ROUTES_CHANGE, this.routes)
-  //   return newRoutes
-  // }
-
-  // beforeAddRoutes<R extends Route>(id: string, ...newRoutes: R[]) {
-  //   this.findRoute(this.routes, id, (_, index, routes) => {
-  //     routes.splice(index, 0, ...newRoutes)
-  //   })
-  //   this.emitter.emit(ROUTES_CHANGE, this.routes)
-  //   return newRoutes
-  // }
-
-  // afterAddRoutes<R extends Route>(id: string, ...newRoutes: R[]) {
-  //   this.findRoute(this.routes, id, (_, index, routes) => {
-  //     routes.splice(index + 1, 0, ...newRoutes)
-  //   })
-  //   this.emitter.emit(ROUTES_CHANGE, this.routes)
-  //   return newRoutes
-  // }
-
-  // removeRoute(id: string) {
-  //   this.findRoute(this.routes, id, (_, index, routes) => {
-  //     routes.splice(index, 1)
-  //   })
-  //   this.emitter.emit(ROUTES_CHANGE, this.routes)
-  // }
+  updateRoutes(
+    iteratee: (
+      item: RouteConfig,
+      index: number,
+      routes: RouteConfig[],
+    ) => RouteConfig | RouteConfig[] | void,
+  ) {
+    const routes = mapTree(this.routes, iteratee)
+    this.emitRoutesChange(routes)
+    return routes
+  }
 }
