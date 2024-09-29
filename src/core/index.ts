@@ -100,3 +100,18 @@ export class Application {
     cb?.()
   }
 }
+
+export class ApplicationOperator {
+  private _app?: Application
+
+  get app() {
+    if (!this._app) {
+      throw new Error('Application is not initialized')
+    }
+    return this._app
+  }
+
+  init(app: Application) {
+    this._app = app
+  }
+}
