@@ -7,9 +7,9 @@ import {
   RemixRouterManager,
   RouteConfig,
   RouteLocation,
-  RouterProvider,
   RouteTo,
 } from '@/libs/router'
+import RouterProvider from './RouterProvider'
 
 interface ReactRouterPluginOptions {
   beforeRouteChange?: BeforeRouteChangeInterceptor

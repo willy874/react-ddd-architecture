@@ -1,11 +1,10 @@
 import { createBrowserRouter, RouteObject } from 'react-router-dom'
-import { RemixRouterManager } from './RemixRouterManager'
-import { mapTree } from './utils'
-import { RouteConfig } from './types'
+import { RouteConfig, RouterManager } from '@/libs/router'
 import PageContainer from './PageContainer'
+import { mapTree } from '@/libs/utils/tree'
 
 export function routeConfigResolver(
-  router: RemixRouterManager,
+  router: RouterManager,
 ): (route: RouteConfig) => RouteObject {
   return (route) => {
     const { component, fallback, ...rest } = route
@@ -13,6 +12,7 @@ export function routeConfigResolver(
       ...rest,
       element: (
         <PageContainer
+          config={rest}
           router={router}
           fallback={fallback}
           component={component}
@@ -23,7 +23,7 @@ export function routeConfigResolver(
 }
 
 export function createReactRouter(
-  router: RemixRouterManager,
+  router: RouterManager,
   routes: RouteConfig[],
 ) {
   return createBrowserRouter(mapTree(routes, routeConfigResolver(router)))

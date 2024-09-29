@@ -1,11 +1,15 @@
 import { lazy, Suspense, useEffect, useMemo } from 'react'
-import { useLocation, useNavigate, useParams } from 'react-router-dom'
-import { PageRouteComponentProps } from './types'
-import { RemixRouterManager } from './RemixRouterManager'
-import { getNavigate } from './methods'
+import { useNavigate, useLocation, useParams } from 'react-router-dom'
+import {
+  getNavigate,
+  PageRouteComponentProps,
+  RouteConfig,
+  RouterManager,
+} from '@/libs/router'
 
 interface PageContainerProps {
-  router: RemixRouterManager
+  router: RouterManager
+  config: Omit<RouteConfig, 'component' | 'fallback'>
   fallback?: React.ReactNode
   component?: () => Promise<{
     default: React.ComponentType<PageRouteComponentProps>
@@ -17,6 +21,10 @@ export default function PageContainer({
   fallback,
   component,
 }: PageContainerProps) {
+  const reactNavigate = useNavigate()
+  const location = useLocation()
+  const params = useParams()
+
   const Component = useMemo(() => {
     if (component) {
       return lazy(() => {
@@ -25,20 +33,15 @@ export default function PageContainer({
     }
     return () => null
   }, [component, router])
-
-  const reactNavigate = useNavigate()
   useEffect(() => {
     router.updateNavigateFunction(reactNavigate)
   }, [reactNavigate, router])
-
-  const location = useLocation()
   useEffect(() => {
     router.navigated(location)
   }, [location, router])
 
   const navigate = useMemo(() => getNavigate(router), [router])
 
-  const params = useParams()
   const route = useMemo<PageRouteComponentProps>(() => {
     const { pathname, search } = location
     return {

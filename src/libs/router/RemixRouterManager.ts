@@ -5,14 +5,19 @@ import {
   RouteLocation,
   RouterInterceptor,
   RouteTo,
+  ReactNavigateFunction,
+  ReactNavigateOptions,
+  RouterManager,
 } from './types'
-import type { NavigateFunction, NavigateOptions } from 'react-router-dom'
 import { RouterEventEmitter } from './RouterEventEmitter'
 import { mapTree } from './utils'
 
-export class RemixRouterManager extends RouterEventEmitter {
+export class RemixRouterManager
+  extends RouterEventEmitter
+  implements RouterManager
+{
   private routes: RouteConfig[] = []
-  private navigateFunction: NavigateFunction = () => {}
+  private navigateFunction: ReactNavigateFunction = () => {}
   private prevRoute: RouteLocation | null = null
   private currentRoute: RouteLocation = {
     state: {},
@@ -50,7 +55,7 @@ export class RemixRouterManager extends RouterEventEmitter {
     return this.routes
   }
 
-  updateNavigateFunction(navigate: NavigateFunction) {
+  updateNavigateFunction(navigate: ReactNavigateFunction) {
     this.navigateFunction = navigate
   }
 
@@ -91,7 +96,7 @@ export class RemixRouterManager extends RouterEventEmitter {
     }
   }
 
-  async navigate(to: RouteTo | number, options?: NavigateOptions) {
+  async navigate(to: RouteTo | number, options?: ReactNavigateOptions) {
     this.promise = new Promise((resolve) => {
       this.resolve = resolve
     })

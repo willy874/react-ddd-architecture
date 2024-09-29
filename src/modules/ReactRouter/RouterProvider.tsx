@@ -1,13 +1,13 @@
 import { useMemo, useSyncExternalStore } from 'react'
-import { RemixRouterManager } from './RemixRouterManager'
-import { createReactRouter } from './createReactRouter'
 import { RouterProvider as ReactRouterProvider } from 'react-router-dom'
+import { RouterManager } from '@/libs/router'
+import { createReactRouter } from './createReactRouter'
 
 interface RouterProviderProps {
-  router: RemixRouterManager
+  router: RouterManager
 }
 
-export function RouterProvider({ router }: RouterProviderProps) {
+export default function RouterProvider({ router }: RouterProviderProps) {
   const routes = useSyncExternalStore(
     (cb) => router.onRoutesChange(cb),
     () => router.getRoutes(),

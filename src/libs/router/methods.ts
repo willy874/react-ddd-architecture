@@ -1,6 +1,5 @@
 import { generatePath } from 'react-router-dom'
-import { RemixRouterManager } from './RemixRouterManager'
-import { NavigateRoute, NavigateFunction } from './types'
+import { NavigateRoute, NavigateFunction, RouterManager } from './types'
 
 function toUrl(path: string, options: Omit<NavigateRoute, 'id' | 'replace'>) {
   const { params, query } = options
@@ -10,7 +9,7 @@ function toUrl(path: string, options: Omit<NavigateRoute, 'id' | 'replace'>) {
   return url
 }
 
-export function getNavigate(router: RemixRouterManager) {
+export function getNavigate(router: RouterManager) {
   const navigate: NavigateFunction = (to) => {
     if (typeof to === 'string') {
       return router.navigate(to)
