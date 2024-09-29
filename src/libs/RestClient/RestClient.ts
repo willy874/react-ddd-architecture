@@ -119,6 +119,26 @@ export class RestClient implements IRestClient {
     return new Request(this.url, { ...this.options, ...options })
   }
 
+  addRequestInterceptor(interceptor: (request: Request) => Promise<Request>) {
+    const rc = new RestClient(this)
+    rc.interceptor.request.push(interceptor)
+    return rc
+  }
+
+  addResponseInterceptor(
+    interceptor: (response: Response) => Promise<Response>,
+  ) {
+    const rc = new RestClient(this)
+    rc.interceptor.response.push(interceptor)
+    return rc
+  }
+
+  addErrorInterceptor(interceptor: (error: unknown) => Promise<Response>) {
+    const rc = new RestClient(this)
+    rc.interceptor.error.push(interceptor)
+    return rc
+  }
+
   private requestInterceptor(context: RestClientContext, request: Request) {
     context.request = request
     return this.interceptor.request.reduce((acc, interceptor) => {

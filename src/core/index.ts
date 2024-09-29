@@ -23,11 +23,11 @@ export class Application {
   private plugins: ApplicationPluginOptions[] = []
 
   constructor(context: ApplicationContext) {
-    this.context = context
+    this.context = { ...context }
   }
 
   getContext() {
-    return this.context
+    return { ...this.context }
   }
 
   on<T extends keyof ApplicationEvent>(
