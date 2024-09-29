@@ -5,8 +5,6 @@ export type {
   NavigateFunction,
   RouteConfig,
   PageRouteComponentProps,
-  RouteLocation,
-  RouteTo,
   BeforeRouteChangeInterceptor,
   AfterRouteChangeInterceptor,
   RouterManager,

@@ -12,7 +12,7 @@ export function routeConfigResolver(
       ...rest,
       element: (
         <PageContainer
-          config={rest}
+          // config={rest}
           router={router}
           fallback={fallback}
           component={component}

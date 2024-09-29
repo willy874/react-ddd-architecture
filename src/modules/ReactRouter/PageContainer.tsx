@@ -2,14 +2,14 @@ import { lazy, Suspense, useEffect, useMemo } from 'react'
 import { useNavigate, useLocation, useParams } from 'react-router-dom'
 import {
   getNavigate,
-  PageRouteComponentProps,
-  RouteConfig,
   RouterManager,
+  PageRouteComponentProps,
+  // RouteConfig,
 } from '@/libs/router'
 
 interface PageContainerProps {
   router: RouterManager
-  config: Omit<RouteConfig, 'component' | 'fallback'>
+  // config: Omit<RouteConfig, 'component' | 'fallback'>
   fallback?: React.ReactNode
   component?: () => Promise<{
     default: React.ComponentType<PageRouteComponentProps>

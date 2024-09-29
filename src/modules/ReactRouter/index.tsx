@@ -1,13 +1,11 @@
 import { ApplicationPlugin } from '@/core'
-import {
+import { RemixRouterManager, getNavigate } from '@/libs/router'
+import type {
+  RouterManager,
   AfterRouteChangeInterceptor,
   BeforeRouteChangeInterceptor,
-  getNavigate,
   NavigateFunction,
-  RemixRouterManager,
   RouteConfig,
-  RouteLocation,
-  RouteTo,
 } from '@/libs/router'
 import RouterProvider from './RouterProvider'
 
@@ -58,7 +56,7 @@ declare module '@/core' {
     ) => RouteConfig[]
   }
   interface ApplicationEvent {
-    beforeRouteChange: (to: RouteTo | number, from: RouteLocation) => void
-    afterRouteChange: (to: RouteLocation, from: RouteLocation) => void
+    beforeRouteChange: RouterManager['emitBeforeRouteChange']
+    afterRouteChange: RouterManager['emitAfterRouteChange']
   }
 }

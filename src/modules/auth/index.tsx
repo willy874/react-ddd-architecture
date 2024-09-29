@@ -1,11 +1,9 @@
-import { lazy } from 'react'
-
-const Login = lazy(() => import('./pages/Login'))
+import { RouteConfig } from '@/libs/router'
 
 export const routes = [
   {
     id: 'login',
     path: '/login',
-    element: <Login />,
+    component: () => import('./pages/Login'),
   },
-]
+] satisfies RouteConfig[]
