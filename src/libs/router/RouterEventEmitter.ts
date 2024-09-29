@@ -1,33 +1,36 @@
 import { EventEmitter } from 'events'
-import { RouteConfig } from './types'
-import { To, Location } from 'react-router-dom'
+import { RouteConfig, RouteLocation, RouteTo } from './types'
 
 const BEFORE_ROUTE_CHANGE = 'beforeRouteChange'
-const ROUTE_CHANGE = 'routeChange'
+const AFTER_ROUTE_CHANGE = 'afterRouteChange'
 const ROUTES_CHANGE = 'routesChange'
 
 export class RouterEventEmitter {
   private emitter = new EventEmitter()
 
-  emitBeforeRouteChange(to: To | number, from: Location) {
+  emitBeforeRouteChange(to: RouteTo | number, from: RouteLocation) {
     this.emitter.emit(BEFORE_ROUTE_CHANGE, to, from)
   }
 
-  onBeforeRouteChange(callback: (to: To | number, from: Location) => void) {
+  onBeforeRouteChange(
+    callback: (to: RouteTo | number, from: RouteLocation) => void,
+  ) {
     this.emitter.on(BEFORE_ROUTE_CHANGE, callback)
     return () => {
       this.emitter.off(BEFORE_ROUTE_CHANGE, callback)
     }
   }
 
-  emitRouteChange(to: Location, from: Location) {
-    this.emitter.emit(ROUTE_CHANGE, to, from)
+  emitAfterRouteChange(to: RouteLocation, from: RouteLocation) {
+    this.emitter.emit(AFTER_ROUTE_CHANGE, to, from)
   }
 
-  onRouteChange(callback: (to: Location, from: Location) => void) {
-    this.emitter.on(ROUTE_CHANGE, callback)
+  onAfterRouteChange(
+    callback: (to: RouteLocation, from: RouteLocation) => void,
+  ) {
+    this.emitter.on(AFTER_ROUTE_CHANGE, callback)
     return () => {
-      this.emitter.off(ROUTE_CHANGE, callback)
+      this.emitter.off(AFTER_ROUTE_CHANGE, callback)
     }
   }
 

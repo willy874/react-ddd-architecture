@@ -1,10 +1,5 @@
 import { lazy, Suspense, useEffect, useMemo } from 'react'
-import {
-  useLocation,
-  useNavigate,
-  useParams,
-  NavigateFunction as ReactNavigateFunction,
-} from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { PageRouteComponentProps } from './types'
 import { RemixRouterManager } from './RemixRouterManager'
 import { getNavigate } from './methods'
@@ -31,7 +26,7 @@ export default function PageContainer({
     return () => null
   }, [component, router])
 
-  const reactNavigate: ReactNavigateFunction = useNavigate()
+  const reactNavigate = useNavigate()
   useEffect(() => {
     router.updateNavigateFunction(reactNavigate)
   }, [reactNavigate, router])

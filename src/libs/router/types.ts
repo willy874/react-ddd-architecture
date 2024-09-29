@@ -52,7 +52,20 @@ interface IndexRouteConfig extends Omit<IndexRouteObject, 'id' | 'element'> {
 
 export type RouteConfig = NonIndexRouteConfig | IndexRouteConfig
 
+export type RouteTo = To
+export type RouteLocation = Location<unknown>
+
+export type BeforeRouteChangeInterceptor = (
+  RouteTo: To | number,
+  from: RouteLocation,
+) => Promise<RouteTo>
+
+export type AfterRouteChangeInterceptor = (
+  to: RouteLocation,
+  from: RouteLocation,
+) => Promise<RouteLocation>
+
 export interface RouterInterceptor {
-  beforeRouteChange: ((to: To | number, from: Location) => Promise<To>)[]
-  afterRouteChange: ((to: Location, from: Location) => Promise<Location>)[]
+  beforeRouteChange: BeforeRouteChangeInterceptor[]
+  afterRouteChange: AfterRouteChangeInterceptor[]
 }

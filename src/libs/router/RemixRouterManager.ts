@@ -1,18 +1,20 @@
-import { RouteConfig, RouterInterceptor } from './types'
-import type {
-  Location,
-  NavigateFunction,
-  To,
-  NavigateOptions,
-} from 'react-router-dom'
+import {
+  AfterRouteChangeInterceptor,
+  BeforeRouteChangeInterceptor,
+  RouteConfig,
+  RouteLocation,
+  RouterInterceptor,
+  RouteTo,
+} from './types'
+import type { NavigateFunction, NavigateOptions } from 'react-router-dom'
 import { RouterEventEmitter } from './RouterEventEmitter'
 import { mapTree } from './utils'
 
 export class RemixRouterManager extends RouterEventEmitter {
   private routes: RouteConfig[] = []
   private navigateFunction: NavigateFunction = () => {}
-  private prevRoute: Location | null = null
-  private currentRoute: Location = {
+  private prevRoute: RouteLocation | null = null
+  private currentRoute: RouteLocation = {
     state: {},
     pathname: window.location.pathname,
     search: window.location.search,
@@ -32,6 +34,14 @@ export class RemixRouterManager extends RouterEventEmitter {
     this.routes = routes
   }
 
+  addAfterRouteChangeInterceptor(interceptor: AfterRouteChangeInterceptor) {
+    this.interceptor.afterRouteChange.push(interceptor)
+  }
+
+  addBeforeRouteChangeInterceptor(interceptor: BeforeRouteChangeInterceptor) {
+    this.interceptor.beforeRouteChange.push(interceptor)
+  }
+
   awaitNavigate() {
     return Promise.resolve(this.promise)
   }
@@ -44,13 +54,13 @@ export class RemixRouterManager extends RouterEventEmitter {
     this.navigateFunction = navigate
   }
 
-  async beforeRouteChange(to: To | number, from: Location) {
+  async beforeRouteChange(to: RouteTo | number, from: RouteLocation) {
     let isRedirect = false
-    let newTo = to
+    let newRouteTo = to
     for (const interceptor of this.interceptor.beforeRouteChange) {
       const current = await interceptor(to, from)
       if (to !== current) {
-        newTo = current
+        newRouteTo = current
         isRedirect = true
       }
       if (isRedirect) {
@@ -58,11 +68,11 @@ export class RemixRouterManager extends RouterEventEmitter {
       }
     }
     if (isRedirect) {
-      this.navigate(newTo)
+      this.navigate(newRouteTo)
     }
   }
 
-  async afterRouteChange(to: Location, from: Location) {
+  async afterRouteChange(to: RouteLocation, from: RouteLocation) {
     const base = {
       pathname: to.pathname,
       search: to.search,
@@ -81,7 +91,7 @@ export class RemixRouterManager extends RouterEventEmitter {
     }
   }
 
-  async navigate(to: To | number, options?: NavigateOptions) {
+  async navigate(to: RouteTo | number, options?: NavigateOptions) {
     this.promise = new Promise((resolve) => {
       this.resolve = resolve
     })
@@ -95,12 +105,12 @@ export class RemixRouterManager extends RouterEventEmitter {
     return Promise.resolve(this.promise)
   }
 
-  async navigated(current: Location) {
+  async navigated(current: RouteLocation) {
     this.prevRoute = this.currentRoute
     this.currentRoute = current
     await this.afterRouteChange(this.currentRoute, this.prevRoute)
     this.resolve()
-    this.emitRouteChange(this.currentRoute, this.prevRoute)
+    this.emitAfterRouteChange(this.currentRoute, this.prevRoute)
   }
 
   nextPath(current: string, add?: string): string {
