@@ -63,7 +63,7 @@ export class Application {
   query(type: string, ...params: unknown[]) {
     const fail = Symbol('fail')
     let response: unknown = fail
-    this.emitter.once(`provider:${type}`, params => {
+    this.emitter.once(`provider:${type}`, (params) => {
       response = params
     })
     this.emitter.emit(`query:${type}`, ...params)
@@ -93,7 +93,7 @@ export class Application {
   }
 
   start(cb?: () => void) {
-    this.plugins.forEach(plugin => {
+    this.plugins.forEach((plugin) => {
       plugin.start?.()
     })
     cb?.()

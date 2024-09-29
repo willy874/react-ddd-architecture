@@ -7,7 +7,7 @@ import PageContainer from './PageContainer'
 export function routeConfigResolver(
   router: RemixRouterManager,
 ): (route: RouteConfig) => RouteObject {
-  return route => {
+  return (route) => {
     const { component, fallback, ...rest } = route
     return {
       ...rest,
@@ -22,8 +22,9 @@ export function routeConfigResolver(
   }
 }
 
-export function createRouter(router: RemixRouterManager) {
-  return createBrowserRouter(
-    mapTree(router.routes, routeConfigResolver(router)),
-  )
+export function createReactRouter(
+  router: RemixRouterManager,
+  routes: RouteConfig[],
+) {
+  return createBrowserRouter(mapTree(routes, routeConfigResolver(router)))
 }

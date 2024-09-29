@@ -13,7 +13,7 @@ interface ReactPluginOptions {
 export const ReactAppPlugin = (
   options: ReactPluginOptions,
 ): ApplicationPlugin => {
-  return app => {
+  return (app) => {
     const { providers, main: Main, el } = options
     const root = ReactDOM.createRoot(el())
     const render = () => {

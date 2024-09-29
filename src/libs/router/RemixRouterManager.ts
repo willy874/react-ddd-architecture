@@ -8,8 +8,8 @@ import type {
 import { RouterEventEmitter } from './RouterEventEmitter'
 
 export class RemixRouterManager extends RouterEventEmitter {
-  public routes: RouteConfig[] = []
-  public navigateFunction: NavigateFunction = () => {}
+  private routes: RouteConfig[] = []
+  private navigateFunction: NavigateFunction = () => {}
   private prevRoute: Location | null = null
   private currentRoute: Location = {
     state: {},
@@ -21,6 +21,26 @@ export class RemixRouterManager extends RouterEventEmitter {
   private interceptor: RouterInterceptor = {
     beforeRouteChange: [],
     afterRouteChange: [],
+  }
+
+  private promise: Promise<void> = Promise.resolve()
+  private resolve: () => void = () => {}
+
+  constructor(routes: RouteConfig[]) {
+    super()
+    this.routes = routes
+  }
+
+  awaitNavigate() {
+    return Promise.resolve(this.promise)
+  }
+
+  getRoutes() {
+    return this.routes
+  }
+
+  updateNavigateFunction(navigate: NavigateFunction) {
+    this.navigateFunction = navigate
   }
 
   async beforeRouteChange(to: To | number, from: Location) {
@@ -60,11 +80,8 @@ export class RemixRouterManager extends RouterEventEmitter {
     }
   }
 
-  public promise: Promise<void> = Promise.resolve()
-  public resolve: () => void = () => {}
-
   async navigate(to: To | number, options?: NavigateOptions) {
-    this.promise = new Promise(resolve => {
+    this.promise = new Promise((resolve) => {
       this.resolve = resolve
     })
     this.emitBeforeRouteChange(to, this.currentRoute)
