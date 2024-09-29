@@ -122,7 +122,7 @@ export class RestClient implements IRestClient {
   private requestInterceptor(context: RestClientContext, request: Request) {
     context.request = request
     return this.interceptor.request.reduce((acc, interceptor) => {
-      return acc.then(interceptor).then(req => {
+      return acc.then(interceptor).then((req) => {
         context.request = req
         return Promise.resolve(req)
       })
@@ -132,7 +132,7 @@ export class RestClient implements IRestClient {
   private responseInterceptor(context: RestClientContext, response: Response) {
     context.response = response
     return this.interceptor.response.reduce((acc, interceptor) => {
-      return acc.then(interceptor).then(res => {
+      return acc.then(interceptor).then((res) => {
         context.response = res
         return Promise.resolve(res)
       })
@@ -143,7 +143,7 @@ export class RestClient implements IRestClient {
     return this.interceptor.error.reduce(
       (acc, interceptor) => {
         if (acc instanceof Error) {
-          return acc.catch(error => {
+          return acc.catch((error) => {
             const restClientError = new RestClientError({
               error,
               ...context,
@@ -151,7 +151,7 @@ export class RestClient implements IRestClient {
             return interceptor(restClientError)
           })
         }
-        return acc.catch(error => interceptor(error))
+        return acc.catch((error) => interceptor(error))
       },
       Promise.reject(error) as Promise<Response>,
     )
@@ -174,8 +174,8 @@ export class RestClient implements IRestClient {
       .then(() => {
         return this.requestInterceptor(context, this.build({ body }))
       })
-      .then(req => fetch(req))
-      .then(response => {
+      .then((req) => fetch(req))
+      .then((response) => {
         if (!response.ok) {
           context.response = response
           return Promise.reject(
@@ -184,7 +184,7 @@ export class RestClient implements IRestClient {
         }
         return this.responseInterceptor(context, response)
       })
-      .catch(error => {
+      .catch((error) => {
         return this.errorInterceptor(context, error)
       })
   }

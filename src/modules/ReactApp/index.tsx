@@ -2,31 +2,41 @@ import { ApplicationPlugin } from '@/core'
 import { StrictMode } from 'react'
 import ReactDOM from 'react-dom/client'
 
+type ConfigComponent = React.ComponentType<{ children: React.ReactNode }>
+
 interface ReactPluginOptions {
-  el: Element
+  el: () => Element
+  main: React.ComponentType
+  providers: ConfigComponent[]
 }
 
 export const ReactAppPlugin = (
   options: ReactPluginOptions,
 ): ApplicationPlugin => {
-  return app => {
-    let node: React.ReactNode = null
-    const root = ReactDOM.createRoot(options.el)
+  return (app) => {
+    const { providers, main: Main, el } = options
+    const root = ReactDOM.createRoot(el())
     const render = () => {
-      root.render(<StrictMode>{node}</StrictMode>)
+      root.render(
+        <StrictMode>
+          {providers.reduceRight(
+            (acc, Provider) => {
+              return <Provider>{acc}</Provider>
+            },
+            <Main />,
+          )}
+        </StrictMode>,
+      )
     }
     app.provider('render', render)
-    app.provider('setAppSlot', slot => {
-      node = slot(node)
-      render()
-    })
-    return {}
+    return {
+      name: 'ReactAppPlugin',
+    }
   }
 }
 
 declare module '@/core' {
   interface ApplicationService {
     render: () => void
-    setAppSlot: (slot: (prev: React.ReactNode) => React.ReactNode) => void
   }
 }

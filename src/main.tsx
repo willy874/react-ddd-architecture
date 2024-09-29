@@ -1,39 +1,26 @@
 import './index.css'
 import { Application } from './core'
+import { RouteConfig } from './libs/router'
 import { ReactAppPlugin } from './modules/ReactApp'
-import { RouterGuardPlugin } from './modules/RouterGuard'
-import { Dashboard } from './modules/Dashboard'
-import { RouterManager } from './libs/router'
-import { LayoutManager } from './libs/layout'
-import { RouteObject } from 'react-router-dom'
+import { createRouter } from './modules/ReactRouter'
 
-const app = new Application({
-  router: new RouterManager(),
-  layout: new LayoutManager(),
-})
-
-declare module './core' {
-  interface ApplicationContext {
-    router: RouterManager<RouteObject>
-    layout: LayoutManager
-  }
-}
+const app = new Application({})
+const { RouterProvider, ReactRouterPlugin } = createRouter([
+  {
+    id: 'home',
+    path: '/',
+    component: () => import('./modules/Dashboard/DashboardPage'),
+  },
+] satisfies RouteConfig[])
 
 app
   .use(
     ReactAppPlugin({
-      el: document.getElementById('root')!,
+      el: () => document.getElementById('root')!,
+      main: RouterProvider,
+      providers: [],
     }),
   )
-  .use(
-    RouterGuardPlugin({
-      onInit: route => {
-        const ctx = app.getContext()
-        ctx.router.addRouteChild(route.id, {
-          path: '*',
-          element: <Dashboard />,
-        })
-      },
-    }),
-  )
-  .start()
+  .use(ReactRouterPlugin())
+
+app.query('render')

@@ -1,12 +1,17 @@
 import { EventEmitter } from 'events'
 
-export interface ApplicationContext {}
+export interface ApplicationContext {
+  [key: string]: unknown
+  [key: number]: unknown
+  [key: symbol]: unknown
+}
 
 export interface ApplicationService {}
 
 export interface ApplicationEvent {}
 
 export interface ApplicationPluginOptions {
+  name: string
   start?: () => void
 }
 
@@ -59,7 +64,7 @@ export class Application {
   query(type: string, ...params: unknown[]) {
     const fail = Symbol('fail')
     let response: unknown = fail
-    this.emitter.once(`provider:${type}`, params => {
+    this.emitter.once(`provider:${type}`, (params) => {
       response = params
     })
     this.emitter.emit(`query:${type}`, ...params)
@@ -89,9 +94,24 @@ export class Application {
   }
 
   start(cb?: () => void) {
-    this.plugins.forEach(plugin => {
+    this.plugins.forEach((plugin) => {
       plugin.start?.()
     })
     cb?.()
+  }
+}
+
+export class ApplicationOperator {
+  private _app?: Application
+
+  get app() {
+    if (!this._app) {
+      throw new Error('Application is not initialized')
+    }
+    return this._app
+  }
+
+  init(app: Application) {
+    this._app = app
   }
 }
