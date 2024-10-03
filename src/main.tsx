@@ -2,7 +2,7 @@ import './index.css'
 import { Application } from './core'
 import { RouteConfig } from './libs/router'
 import { ReactAppPlugin } from './modules/ReactApp'
-import { createRouter } from './modules/ReactRouter'
+import { initRouterModule } from './modules/ReactRouter'
 import { RestClient } from './libs/RestClient'
 
 const app = new Application({
@@ -15,7 +15,7 @@ declare module './core' {
   }
 }
 
-const { RouterProvider, ReactRouterPlugin } = createRouter([
+const { RouterProvider, ReactRouterPlugin } = initRouterModule([
   {
     id: 'home',
     path: '/',

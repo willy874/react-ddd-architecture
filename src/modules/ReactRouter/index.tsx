@@ -14,10 +14,10 @@ interface ReactRouterPluginOptions {
   afterRouteChange?: AfterRouteChangeInterceptor
 }
 
-export function createRouter(routes: RouteConfig[]) {
+export function initRouterModule(routes: RouteConfig[]) {
   const router = new RemixRouterManager(routes)
   return {
-    ReactRouterPlugin: function plugin(
+    ReactRouterPlugin: function (
       options: ReactRouterPluginOptions = {},
     ): ApplicationPlugin {
       return (app) => {

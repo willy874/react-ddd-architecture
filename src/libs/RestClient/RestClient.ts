@@ -159,15 +159,46 @@ export class RestClient implements IRestClient {
     }, Promise.resolve(context.response))
   }
 
+  private async resolveResponse(response?: Response) {
+    if (!response) {
+      return undefined
+    }
+    const contentType = response.headers.get('Content-Type') || ''
+    if (contentType.includes('application/json')) {
+      return RestClient.json(response)
+    }
+    if (contentType.includes('application/octet-stream')) {
+      return RestClient.blob(response)
+    }
+    return RestClient.text(response)
+  }
+
+  private async errorHandler(
+    error: unknown,
+    request?: Request,
+    response?: Response,
+  ) {
+    if (error instanceof Error) {
+      return new RestClientError({
+        error: response ? httpErrorHandler(response) : error,
+        response,
+        request,
+        data: this.resolveResponse(response),
+      })
+    }
+    return error
+  }
+
   private errorInterceptor(context: RestClientContext, error: unknown) {
     return this.interceptor.error.reduce(
       (acc, interceptor) => {
         if (acc instanceof Error) {
           return acc.catch((error) => {
-            const restClientError = new RestClientError({
+            const restClientError = this.errorHandler(
               error,
-              ...context,
-            })
+              context.request,
+              context.response,
+            )
             return interceptor(restClientError)
           })
         }
@@ -177,37 +208,39 @@ export class RestClient implements IRestClient {
     )
   }
 
-  private errorHandler(request: Request, response: Response) {
-    return new RestClientError({
-      error: httpErrorHandler(response),
-      response,
-      request,
-    })
-  }
-
   send(body?: BodyInit): Promise<Response> {
     const context: RestClientContext = {
       request: undefined,
       response: undefined,
     }
+    let tryError = 0
+    const requestHandler = (): Promise<Request> => {
+      return this.requestInterceptor(context, this.build({ body }))
+    }
+    const responseHandler = (response: Response): Promise<Response> => {
+      if (!response.ok) {
+        context.response = response
+        return Promise.reject(
+          this.errorHandler(null, context.request, context.response),
+        )
+      }
+      return this.responseInterceptor(context, response).catch(errorHandler)
+    }
+    const errorHandler = (error: unknown): Promise<Response> => {
+      tryError++
+      if (tryError > RestClient.TRY_ERROR_COUNT) {
+        return Promise.reject(error)
+      }
+      return this.errorInterceptor(context, error).then(responseHandler)
+    }
     return Promise.resolve()
-      .then(() => {
-        return this.requestInterceptor(context, this.build({ body }))
-      })
-      .then((req) => fetch(req))
-      .then((response) => {
-        if (!response.ok) {
-          context.response = response
-          return Promise.reject(
-            this.errorHandler(context.request!, context.response),
-          )
-        }
-        return this.responseInterceptor(context, response)
-      })
-      .catch((error) => {
-        return this.errorInterceptor(context, error)
-      })
+      .then(requestHandler)
+      .then(fetch)
+      .then(responseHandler)
   }
+
+  static REST_CLIENT_ERROR = 'RestClientError'
+  static TRY_ERROR_COUNT = 3
 
   static json<T>(response: Response): Promise<T> {
     return response.json()
