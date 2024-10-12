@@ -21,13 +21,14 @@ const onFetchedRefreshToken = (data: RefreshTokenResponseDTO) => {
   localStorageManager.setItem('accessToken', data.accessToken)
   localStorageManager.setItem('refreshToken', data.refreshToken)
 }
-const onFetchedRefreshTokenError = () => {
+const onFetchedRefreshTokenError = (error: unknown) => {
   localStorageManager.removeItem('accessToken')
   localStorageManager.removeItem('refreshToken')
+  return Promise.reject(error)
 }
 
 const checkRefreshToken = (error: RestClientResponseError) => {
-  return error.response.status === 403
+  return error.response.status === 403 || error.response.status === 401
 }
 
 const onRefreshToken = refreshTokenFactory({
@@ -35,13 +36,20 @@ const onRefreshToken = refreshTokenFactory({
     fetchRefreshToken(getRefreshToken())
       .then(onFetchedRefreshToken)
       .catch(onFetchedRefreshTokenError),
-  onRefetch: (req: Request) => window.fetch(req),
+  onRefetch: (error: RestClientResponseError) => {
+    const request = new Request(error.request)
+    request.headers.set(
+      'Authorization',
+      `Bearer ${localStorageManager.getItem('accessToken')}`,
+    )
+    return window.fetch(request)
+  },
 })
 
 export const responseErrorInterceptor = cond<
   RestClientResponseError,
   Promise<Response>
 >([
-  [checkRefreshToken, (error) => onRefreshToken(error.request)],
+  [checkRefreshToken, onRefreshToken],
   [() => true, (err) => Promise.reject(err)],
 ])
