@@ -17,9 +17,9 @@ const getRefreshToken = (): RefreshTokenRequestDTO => {
   }
   throw new Error('No refresh token')
 }
-const onFetchedRefreshToken = (data: RefreshTokenResponseDTO) => {
-  localStorageManager.setItem('accessToken', data.accessToken)
-  localStorageManager.setItem('refreshToken', data.refreshToken)
+const onFetchedRefreshToken = (res: RefreshTokenResponseDTO) => {
+  localStorageManager.setItem('accessToken', res.data.accessToken)
+  localStorageManager.setItem('refreshToken', res.data.refreshToken)
 }
 const onFetchedRefreshTokenError = (error: unknown) => {
   localStorageManager.removeItem('accessToken')

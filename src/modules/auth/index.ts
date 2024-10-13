@@ -6,7 +6,6 @@ import {
   requestInterceptor,
   responseInterceptor,
 } from './interceptor'
-import { appOperator } from './services'
 import { responseErrorInterceptor } from './errorHandler'
 
 export const routes = [
@@ -20,7 +19,6 @@ export const routes = [
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const AuthPlugin = (_options: {}): ApplicationPlugin => {
   return (app) => {
-    appOperator.init(app)
     const context = app.getContext()
     const getRestClient = () =>
       context.restClient.headers({
